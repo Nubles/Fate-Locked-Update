@@ -306,55 +306,49 @@ export const StrategyGuide: React.FC<{ onClose: () => void }> = ({ onClose }) =>
                                         <p>No locked content found.</p>
                                     </div>
                                 ) : (
-                                    filteredPlanner.map(content => {
-                                        const { missingRegions, missingSkills, missingQuests, isCategoryUnlocked, completionPercent } = content.analysis;
-                                        const isPinned = pinnedGoals.includes(content.uniqueId);
-                                        const progressColor = completionPercent > 75 ? 'bg-green-500' : completionPercent > 40 ? 'bg-yellow-500' : 'bg-red-500';
-                                        
-                                        return (
-                                            <div key={content.uniqueId} className="bg-[#161616] border border-white/5 rounded-lg p-4 flex flex-col lg:flex-row gap-6 relative overflow-hidden group hover:border-white/10 transition-colors">
-                                                <div className="absolute bottom-0 left-0 h-1 bg-white/5 w-full"><div className={`h-full ${progressColor} transition-all duration-500`} style={{ width: `${completionPercent}%` }}></div></div>
-                                                <div className="lg:w-1/3 shrink-0 flex flex-col">
-                                                    <div className="flex justify-between items-start mb-2">
-                                                        <div className="flex flex-col gap-1">
-                                                             <h3 className="text-gray-200 font-bold text-lg leading-tight">{content.uniqueId}</h3>
-                                                             {content.id !== content.uniqueId && <span className="text-[10px] text-gray-500 font-mono uppercase tracking-wider">{content.id}</span>}
-                                                        </div>
-                                                        <button onClick={() => togglePin(content.uniqueId)} className={`p-1.5 rounded transition-colors ${isPinned ? 'text-blue-400 bg-blue-900/20' : 'text-gray-600 hover:text-gray-300'}`} title={isPinned ? "Unpin Goal" : "Pin as Goal"}>
-                                                            <Pin size={16} fill={isPinned ? "currentColor" : "none"} />
-                                                        </button>
+                                    filteredPlanner.map((content) => (
+                                        <div key={content.uniqueId} className="bg-[#161616] border border-white/5 rounded-lg p-4 flex flex-col lg:flex-row gap-6 relative overflow-hidden group hover:border-white/10 transition-colors">
+                                            <div className="absolute bottom-0 left-0 h-1 bg-white/5 w-full"><div className={`h-full ${content.analysis.completionPercent > 75 ? 'bg-green-500' : content.analysis.completionPercent > 40 ? 'bg-yellow-500' : 'bg-red-500'} transition-all duration-500`} style={{ width: `${content.analysis.completionPercent}%` }}></div></div>
+                                            <div className="lg:w-1/3 shrink-0 flex flex-col">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <div className="flex flex-col gap-1">
+                                                            <h3 className="text-gray-200 font-bold text-lg leading-tight">{content.uniqueId}</h3>
+                                                            {content.id !== content.uniqueId && <span className="text-[10px] text-gray-500 font-mono uppercase tracking-wider">{content.id}</span>}
                                                     </div>
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        <span className="text-[10px] text-gray-500 uppercase border border-white/10 px-1.5 py-0.5 rounded">{content.category}</span>
-                                                        <span className={`text-[10px] font-bold ${completionPercent > 80 ? 'text-green-400' : 'text-gray-500'}`}>{completionPercent}% Complete</span>
-                                                    </div>
-                                                    <p className="text-xs text-gray-500 mb-3 leading-relaxed">{content.description}</p>
-                                                    <div className="mt-auto flex flex-col gap-1">
-                                                        {!isCategoryUnlocked && <div className="flex items-center gap-2 text-red-400 text-xs font-bold bg-red-900/10 p-1.5 rounded border border-red-500/20"><Lock size={12} /><span>LOCKED CATEGORY (Requires Key)</span></div>}
-                                                    </div>
+                                                    <button onClick={() => togglePin(content.uniqueId)} className={`p-1.5 rounded transition-colors ${pinnedGoals.includes(content.uniqueId) ? 'text-blue-400 bg-blue-900/20' : 'text-gray-600 hover:text-gray-300'}`} title={pinnedGoals.includes(content.uniqueId) ? "Unpin Goal" : "Pin as Goal"}>
+                                                        <Pin size={16} fill={pinnedGoals.includes(content.uniqueId) ? "currentColor" : "none"} />
+                                                    </button>
                                                 </div>
-                                                <div className="flex-1 flex flex-col justify-center border-t lg:border-t-0 lg:border-l border-white/5 pt-4 lg:pt-0 lg:pl-6">
-                                                    <div className="text-[9px] font-bold uppercase tracking-widest text-gray-600 mb-3 flex items-center gap-2"><Target size={10} /> Requirements Breakdown</div>
-                                                    <div className="flex flex-wrap items-start gap-2">
-                                                        {content.regions.map((region) => {
-                                                            const isMissing = missingRegions.includes(region);
-                                                            return <div key={region} className={`flex items-center gap-1.5 px-2 py-1.5 rounded border text-xs font-mono transition-colors ${isMissing ? 'bg-red-900/20 border-red-500/30 text-red-400' : 'bg-green-900/10 border-green-500/20 text-green-500/70'}`}><Map size={12} /><span>{region}</span>{isMissing ? <Lock size={10} /> : <Check size={10} />}</div>
-                                                        })}
-                                                        {Object.entries(content.skills).map(([skill, level]) => {
-                                                            const skillStatus = missingSkills.find(s => s.skill === skill);
-                                                            const isMissing = !!skillStatus;
-                                                            const isLocked = skillStatus && !skillStatus.isUnlocked;
-                                                            return <div key={skill} className={`flex items-center gap-1.5 px-2 py-1.5 rounded border text-xs font-mono transition-colors ${isMissing ? 'bg-red-900/20 border-red-500/30 text-red-400' : 'bg-green-900/10 border-green-500/20 text-green-500/70'}`}><BookOpen size={12} /><span>{skill} {level}</span>{isLocked ? <Lock size={10} /> : isMissing ? <span className="text-[9px] bg-red-500/20 px-1 rounded">{skillStatus?.currentLevel}</span> : <Check size={10} />}</div>
-                                                        })}
-                                                        {content.quests && content.quests.map(q => {
-                                                            const isMissing = missingQuests.includes(q);
-                                                            return <div key={q} className={`flex items-center gap-1.5 px-2 py-1.5 rounded border text-xs font-mono transition-colors ${isMissing ? 'bg-red-900/20 border-red-500/30 text-red-400' : 'bg-green-900/10 border-green-500/20 text-green-500/70'}`}><ScrollText size={12} />{q}{isMissing ? <Lock size={10} /> : <Check size={10} />}</div>
-                                                        })}
-                                                    </div>
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <span className="text-[10px] text-gray-500 uppercase border border-white/10 px-1.5 py-0.5 rounded">{content.category}</span>
+                                                    <span className={`text-[10px] font-bold ${content.analysis.completionPercent > 80 ? 'text-green-400' : 'text-gray-500'}`}>{content.analysis.completionPercent}% Complete</span>
+                                                </div>
+                                                <p className="text-xs text-gray-500 mb-3 leading-relaxed">{content.description}</p>
+                                                <div className="mt-auto flex flex-col gap-1">
+                                                    {!content.analysis.isCategoryUnlocked && <div className="flex items-center gap-2 text-red-400 text-xs font-bold bg-red-900/10 p-1.5 rounded border border-red-500/20"><Lock size={12} /><span>LOCKED CATEGORY (Requires Key)</span></div>}
                                                 </div>
                                             </div>
-                                        );
-                                })}
+                                            <div className="flex-1 flex flex-col justify-center border-t lg:border-t-0 lg:border-l border-white/5 pt-4 lg:pt-0 lg:pl-6">
+                                                <div className="text-[9px] font-bold uppercase tracking-widest text-gray-600 mb-3 flex items-center gap-2"><Target size={10} /> Requirements Breakdown</div>
+                                                <div className="flex flex-wrap items-start gap-2">
+                                                    {content.regions.map((region) => {
+                                                        const isMissing = content.analysis.missingRegions.includes(region);
+                                                        return <div key={region} className={`flex items-center gap-1.5 px-2 py-1.5 rounded border text-xs font-mono transition-colors ${isMissing ? 'bg-red-900/20 border-red-500/30 text-red-400' : 'bg-green-900/10 border-green-500/20 text-green-500/70'}`}><Map size={12} /><span>{region}</span>{isMissing ? <Lock size={10} /> : <Check size={10} />}</div>
+                                                    })}
+                                                    {Object.entries(content.skills).map(([skill, level]) => {
+                                                        const skillStatus = content.analysis.missingSkills.find(s => s.skill === skill);
+                                                        const isMissing = !!skillStatus;
+                                                        const isLocked = skillStatus && !skillStatus.isUnlocked;
+                                                        return <div key={skill} className={`flex items-center gap-1.5 px-2 py-1.5 rounded border text-xs font-mono transition-colors ${isMissing ? 'bg-red-900/20 border-red-500/30 text-red-400' : 'bg-green-900/10 border-green-500/20 text-green-500/70'}`}><BookOpen size={12} /><span>{skill} {level}</span>{isLocked ? <Lock size={10} /> : isMissing ? <span className="text-[9px] bg-red-500/20 px-1 rounded">{skillStatus?.currentLevel}</span> : <Check size={10} />}</div>
+                                                    })}
+                                                    {content.quests && content.quests.map(q => {
+                                                        const isMissing = content.analysis.missingQuests.includes(q);
+                                                        return <div key={q} className={`flex items-center gap-1.5 px-2 py-1.5 rounded border text-xs font-mono transition-colors ${isMissing ? 'bg-red-900/20 border-red-500/30 text-red-400' : 'bg-green-900/10 border-green-500/20 text-green-500/70'}`}><ScrollText size={12} />{q}{isMissing ? <Lock size={10} /> : <Check size={10} />}</div>
+                                                    })}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )))}
                              </div>
                         </div>
                     )}
