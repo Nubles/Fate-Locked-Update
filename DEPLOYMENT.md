@@ -25,5 +25,6 @@ If you prefer to keep the source on `main` and deploy the site to a separate bra
 
 ## Troubleshooting
 
--   **"MIME type of application/octet-stream"**: This error happens when GitHub Pages tries to serve the *source code* (`index.tsx`) instead of the built application. Ensure you are serving the `docs` folder (Option 1) or the `gh-pages` branch (Option 2), NOT the root of the `main` branch.
+-   **"MIME type of application/octet-stream"**: This error happens when GitHub Pages tries to serve the *source code* (`index.tsx`) instead of the built application. **You are serving the root folder, which is incorrect.** Ensure you are serving the `docs` folder (Option 1) or the `gh-pages` branch (Option 2), NOT the root of the `main` branch.
 -   **"cdn.tailwindcss.com should not be used in production"**: This warning appears if you are serving the development `index.html`. The production build in `docs/` does not use the CDN.
+-   **"Failed to load module script"**: This confirms you are loading `index.html` from the root. Please follow Option 1 or Option 2 above.
